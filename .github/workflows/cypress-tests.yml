@@ -3,8 +3,6 @@ name: E2E Tests
 
 on:
   workflow_dispatch:
-    paths-ignore:
-      - "**.md"
     inputs:
       logLevel:
         description: 'Log level'
