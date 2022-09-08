@@ -2,16 +2,6 @@
 name: E2E Tests
 
 on:
-  push:
-    branches:
-      - dev
-    paths-ignore:
-      - "**.md"
-
-  pull_request:
-    paths-ignore:
-      - "**.md"
-
   workflow_dispatch:
     paths-ignore:
       - "**.md"
