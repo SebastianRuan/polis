@@ -12,6 +12,10 @@ on:
     paths-ignore:
       - "**.md"
 
+  workflow_dispatch:
+    paths-ignore:
+      - "**.md"
+
 jobs:
   cypress-run:
     # Platform recommended in cypress-io/github-action docs.
