@@ -8,7 +8,6 @@ import Flex from "./flex";
 import * as globals from "./globals";
 import BarChart from "./barChart";
 
-@Radium
 class Comment extends React.Component {
   static propTypes = {
     dispatch: PropTypes.func,
@@ -74,6 +73,7 @@ class Comment extends React.Component {
     }
   }
 
+  Comment = Radium(Comment);
   export default Comment;
 
   // <p>{this.props.comment.demographics.gender}</p>
