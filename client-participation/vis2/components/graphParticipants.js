@@ -3,7 +3,7 @@ import _ from "lodash";
 import * as globals from "./globals";
 import {VictoryAnimation} from "victory-core";
 
-const Participant = ({ptpt, tweenX, tweenY}) => {
+export const Participant = ({ptpt, tweenX, tweenY}) => {
   let picSize = ptpt.picture_size;
   return (
     <g
@@ -33,7 +33,7 @@ const Participant = ({ptpt, tweenX, tweenY}) => {
   );
 }
 
-const Bucket = ({pt}) => {
+export const Bucket = ({pt}) => {
   return <circle
     r={0}
     fill={/* globals.groupColor(pt.gid)*/ "rgb(180,180,180)"}
