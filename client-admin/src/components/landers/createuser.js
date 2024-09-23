@@ -12,7 +12,7 @@ import strings from '../../strings/strings'
 
 const fbAppId = process.env.FB_APP_ID
 
-@connect((state) => state.signin)
+// @connect((state) => state.signin)
 class Createuser extends React.Component {
   getDest() {
     return this.props.location.pathname.slice('/createuser'.length)
@@ -224,5 +224,6 @@ class Createuser extends React.Component {
     )
   }
 }
+Createuser = connect((state) => state.signin)(Createuser)
 
 export default Createuser
