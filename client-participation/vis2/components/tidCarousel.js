@@ -2,7 +2,7 @@ import React from "react";
 import * as globals from "./globals";
 import _ from "lodash";
 
-class PaginateButton extends React.Component {
+export class PaginateButton extends React.Component {
 
   render() {
     return (
@@ -27,7 +27,7 @@ class PaginateButton extends React.Component {
 }
 
 
-class TidCarousel extends React.Component {
+export class TidCarousel extends React.Component {
 
   constructor(props) {
     super(props);

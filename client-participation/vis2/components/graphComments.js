@@ -4,7 +4,7 @@ import * as globals from "./globals";
 
 /* https://bl.ocks.org/mbostock/2206590 */
 
-class GraphComment extends React.Component {
+export class GraphComment extends React.Component {
   getRectX() {
     let x = -7;
 
@@ -54,7 +54,7 @@ class GraphComment extends React.Component {
   }
 }
 
-class GraphComments extends React.Component {
+export class GraphComments extends React.Component {
 
   drawComments() {
     let shouldShowOnlyOneGroup = _.isNumber(this.props.showOnlyGroup);

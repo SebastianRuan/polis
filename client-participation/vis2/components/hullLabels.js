@@ -11,7 +11,7 @@ const getBackgroundRectWidth = (ptptCount) =>  {
   return width;
 }
 
-const Users = ({selectedGroup}) => {
+export const Users = ({selectedGroup}) => {
   return (
     <g width={7} fill={selectedGroup ? "white" : "black"} transform={`translate(0,-9)`}>
       <ellipse cx="1.99335548" cy="1.42348754" rx="1.32890365" ry="1.42348754"></ellipse>
@@ -24,7 +24,7 @@ const Users = ({selectedGroup}) => {
   )
 }
 
-const Label = ({ptptCount, centroid, gid, selectedGroup, handleClick}) => {
+export const Label = ({ptptCount, centroid, gid, selectedGroup, handleClick}) => {
   return (
     <g
       transform={`translate(${centroid.x},${centroid.y})`}
@@ -63,7 +63,7 @@ const Label = ({ptptCount, centroid, gid, selectedGroup, handleClick}) => {
   )
 }
 
-const HullLabels = ({groups, centroids, selectedGroup, handleClick}) => {
+export const HullLabels = ({groups, centroids, selectedGroup, handleClick}) => {
 
   if (!centroids || !groups) { return null }
 
