@@ -62,3 +62,21 @@ services:
   #     live-code-reloaded ports
   #   * leave the server pointing to the static builds, but have separate ports you can hit for the live-code
   #     reloading (making sure to document the process)
+
+  client-admin:
+    build:
+      context: ./client-admin
+      dockerfile: Dockerfile
+      args:
+        NODE_ENV: development
+    environment:
+      CHOKIDAR_USEPOLLING: "true"
+    volumes:
+      - ./client-admin:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    networks:
+      - "polis-net"
+  
+

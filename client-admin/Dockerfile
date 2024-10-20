@@ -22,4 +22,4 @@ RUN npm ci --production=false
 
 COPY . .
 
-CMD npm run build:prod
+CMD npm start

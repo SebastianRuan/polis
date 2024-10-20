@@ -47,6 +47,15 @@ module.exports = (env, options) => {
         },
       },
       **/
+
+      port: 3000,
+      proxy: [
+        {context: ['/api'], 
+          target: 'http://127.0.0.1:5000/',
+          secure: false, 
+          changeOrigin: true,
+        }
+      ]
     },
     plugins: [
       new CopyPlugin({
