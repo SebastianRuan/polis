@@ -14,5 +14,16 @@ jobs:
         with:
           node-version: 18
       - run: npm install && npm install -g @lhci/cli@0.14.x
-      - run: npm run build
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and start Docker containers
+        run: |
+          docker compose -f docker-compose.yml -f docker-compose.test.yml --env-file test.env --profile postgres up -d --build
+
       - run: lhci autorun
+
+      - name: Stop Docker containers
+        if: always()
+        run: docker compose -f docker-compose.yml -f docker-compose.test.yml --env-file test.env --profile postgres down
