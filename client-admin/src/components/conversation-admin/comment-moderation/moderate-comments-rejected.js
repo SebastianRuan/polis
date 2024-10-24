@@ -9,7 +9,6 @@ import {
 import { connect } from 'react-redux'
 import Comment from './comment'
 
-@connect((state) => state.mod_comments_rejected)
 class ModerateCommentsRejected extends React.Component {
   onCommentAccepted(comment) {
     this.props.dispatch(changeCommentStatusToAccepted(comment))
@@ -52,4 +51,4 @@ ModerateCommentsRejected.propTypes = {
   rejected_comments: PropTypes.arrayOf(PropTypes.object)
 }
 
-export default ModerateCommentsRejected
+export default connect((state) => state.mod_comments_rejected)(ModerateCommentsRejected)
