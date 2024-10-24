@@ -144,6 +144,7 @@ function getFacebookInfo(uids: any[]) {
   );
 }
 
+// insert a new entry into the `users` table and return the value of uid for the new entry
 function createDummyUser() {
   // (parameter) resolve: (arg0: any) => void
   //   'new' expression, whose target lacks a construct signature, implicitly has an 'any' type.ts(7009)
@@ -300,6 +301,8 @@ function getSocialInfoForUsers(uids: any[], zid: any) {
   );
 }
 
+// an owner with an xid is passed in, returns the matching entry(s?) from `xids` (that includes the corresponding uid)
+// if no xid entry is found, does some optional checks if caller chooses to determine if an entry into xids
 function getXidRecordByXidOwnerId(
   xid: any,
   owner: any,
@@ -322,12 +325,14 @@ function getXidRecordByXidOwnerId(
       //     Type 'unknown' is not assignable to type 'any[]'.ts(2345)
       // @ts-ignore
       .then(function (rows: string | any[]) {
+        // if an `xids` table record with the provided xid and owner id cannot be found 
         if (!rows || !rows.length) {
           logger.warn("getXidRecordByXidOwnerId: no xInfo yet");
           if (!createIfMissing) {
             return null;
           }
 
+          // if provided zid, and if conversation is configured to use xid_whitelist, returns true if the owner id is whitelisted
           var shouldCreateXidEntryPromise = !zid_optional
             ? Promise.resolve(true)
             : Conversation.getConversationInfo(zid_optional).then(
@@ -338,6 +343,7 @@ function getXidRecordByXidOwnerId(
                 }
               );
 
+          // create a new user (in `users` table) and then a new entry in the `xids` table with the uid from the user creation process
           return shouldCreateXidEntryPromise.then((should: any) => {
             if (!should) {
               return null;

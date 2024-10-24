@@ -2,7 +2,7 @@
 
 "use strict";
 
-import akismetLib from "akismet";
+import akismetLib from "akismet";   // spam protection for user-submitted text
 import AWS from "aws-sdk";
 import badwords from "badwords/object";
 import Promise from "bluebird";
@@ -238,6 +238,7 @@ function haltOnTimeout(req: { timedout: any }, res: any, next: () => void) {
   }
 }
 
+// checks if a property (name) exists in a source object and copies that property to a dest object
 function ifDefinedSet(
   name: string,
   source: { [x: string]: any },
@@ -301,6 +302,7 @@ function hasAuthToken(req: { cookies: { [x: string]: any } }) {
   return !!req.cookies[COOKIES.TOKEN];
 }
 
+// returns uid associated with provided apikey
 function getUidForApiKey(apikey: any) {
   return pgQueryP_readOnly_wRetryIfEmpty(
     "select uid from apikeysndvweifu WHERE apikey = ($1);",
@@ -308,6 +310,7 @@ function getUidForApiKey(apikey: any) {
   );
 }
 // http://en.wikipedia.org/wiki/Basic_access_authentication#Client_side
+// parses the apikey (username) from the header and calls doApiKeyAuth with it
 function doApiKeyBasicAuth(
   assigner: any,
   header: string,
@@ -325,6 +328,7 @@ function doApiKeyBasicAuth(
   return doApiKeyAuth(assigner, apikey, isOptional, req, res, next);
 }
 
+// verifies that apikey can be found in the apikeysndvweifu table and assigns the associated uid to req object
 function doApiKeyAuth(
   assigner: (arg0: any, arg1: string, arg2: number) => void,
   apikey: string,
@@ -378,11 +382,12 @@ const getXidRecordByXidOwnerId = User.getXidRecordByXidOwnerId;
 //   });
 // }
 
+// given an apikey and xid, retrieves the associated uid and sets it, along with xid, owner_id, and org_id, in the req object
 function doXidApiKeyAuth(
   assigner: (arg0: any, arg1: string, arg2: number) => void,
   apikey: any,
   xid: any,
-  isOptional: any,
+  isOptional: any,  // whether 
   req: AuthRequest,
   res: { status: (arg0: number) => void },
   next: {
@@ -391,7 +396,7 @@ function doXidApiKeyAuth(
     (arg0?: string | undefined): void;
   }
 ) {
-  getUidForApiKey(apikey)
+  getUidForApiKey(apikey)   // returns uid associated with the provided apikey from apikeysndvweifu table
     .then(
       //     Argument of type '(rows: string | any[]) => Promise<void> | undefined' is not assignable to parameter of type '(value: unknown) => void | PromiseLike<void | undefined> | undefined'.
       // Types of parameters 'rows' and 'value' are incompatible.
@@ -429,7 +434,7 @@ function doXidApiKeyAuth(
             }
           }
           let uidForCurrentUser = Number(rows[0].uid);
-          assigner(req, "uid", uidForCurrentUser);
+          assigner(req, "uid", uidForCurrentUser);    // the uid associated with the owner and xid in the xids table
           assigner(req, "xid", xid);
           assigner(req, "owner_uid", uidForApiKey);
           assigner(req, "org_id", uidForApiKey);
@@ -448,6 +453,9 @@ function doXidApiKeyAuth(
       next("polis_err_auth_misc_23423");
     });
 }
+
+// checks that the auth_token in req.headers is associated with the uid value in req.body as per the auth_tokens table
+// runs the assigner function with the found uid and calls next - assigns uid to req object?
 function doHeaderAuth(
   assigner: (arg0: any, arg1: string, arg2: number) => void,
   isOptional: any,
@@ -465,7 +473,7 @@ function doHeaderAuth(
       next("polis_err_auth_no_such_token");
       return;
     }
-    if (req.body.uid && req.body.uid !== uid) {
+    if (req.body.uid && req.body.uid !== uid) {   // compares the uid retrieved based on the token to the req.body's uid
       res.status(401);
       next("polis_err_auth_mismatch_uid");
       return;
@@ -542,6 +550,7 @@ function initializePolisHelpers() {
   const getPidPromise = User.getPidPromise;
   const getPidForParticipant = User.getPidForParticipant;
 
+  // inserts into permanentCookieZidJoin
   function recordPermanentCookieZidJoin(permanentCookieToken: any, zid: any) {
     function doInsert() {
       return pgQueryP(
@@ -833,17 +842,20 @@ function initializePolisHelpers() {
   //     });
   // }
 
+  // given an xid and conversation_id (zinvite?), verifies that the xid is whitelisted, and assigns the associated uid of that xid to the req object 
+  // calls onDone regardless of auth outcome
   function doXidConversationIdAuth(
     assigner: (arg0: any, arg1: string, arg2: number) => void,
     xid: any,
     conversation_id: any,
-    isOptional: any,
+    isOptional: any,      // whether passing the auth check is optional
     req: AuthRequest,
     res: { status: (arg0: number) => void },
     onDone: { (err: any): void; (arg0?: string): void }
   ) {
     return getConversationInfoByConversationId(conversation_id)
       .then((conv: { org_id: any; zid: any }) => {
+        // 
         return getXidRecordByXidOwnerId(
           xid,
           conv.org_id,
@@ -858,6 +870,7 @@ function initializePolisHelpers() {
           //         Type 'unknown' is not assignable to type 'any[]'.ts(2345)
           // @ts-ignore
         ).then((rows: string | any[]) => {
+          // if conversation requires a whitelist check and the xid is not whitelisted
           if (!rows || !rows.length) {
             if (isOptional) {
               return onDone();
@@ -877,7 +890,11 @@ function initializePolisHelpers() {
         onDone(err);
       });
   }
+
+  // returns a middleware that after authenticating the current user, uses the passed assigner to assign the user's uid to the req object
   function _auth(assigner: any, isOptional: boolean) {
+    
+    // looks for key property in the body, headers, and query 
     function getKey(
       req: {
         body: Body;
@@ -889,6 +906,7 @@ function initializePolisHelpers() {
       return req.body[key] || req?.headers?.[key] || req?.query?.[key];
     }
 
+    // returns a Promise that that when resolved (as a a result of auth success), assigns the uid of the current user to the req object
     function doAuth(
       req: {
         cookies: { [x: string]: any };
@@ -899,7 +917,7 @@ function initializePolisHelpers() {
       res: { status: (arg0: number) => void }
     ) {
       //var token = req.body.token;
-      let token = req.cookies[COOKIES.TOKEN];
+      let token = req.cookies[COOKIES.TOKEN];   // currently req.cookies['token2']
       let xPolisToken = req?.headers?.["x-polis"];
 
       return new Promise(function (
@@ -917,8 +935,8 @@ function initializePolisHelpers() {
         }
         if (xPolisToken) {
           logger.info("authtype: doHeaderAuth");
-          doHeaderAuth(assigner, isOptional, req, res, onDone);
-        } else if (getKey(req, "polisApiKey") && getKey(req, "ownerXid")) {
+          doHeaderAuth(assigner, isOptional, req, res, onDone);     // runs assigner with the uid associated with xPolisToken and calls onDone after
+        } else if (getKey(req, "polisApiKey") && getKey(req, "ownerXid")) {   // if poliApiKey and ownerXid can be found in the body, headers or query properties of req
           doXidApiKeyAuth(
             assigner,
             getKey(req, "polisApiKey"),
@@ -984,12 +1002,12 @@ function initializePolisHelpers() {
             res,
             onDone
           );
-        } else if (req.body.agid) {
+        } else if (req.body.agid) {     // create a new user, ...
           // Auto Gen user  ID
           createDummyUser()
             .then(
               function (uid?: any) {
-                let shouldAddCookies = _.isUndefined(req.body.xid);
+                let shouldAddCookies = _.isUndefined(req.body.xid);   // if there is no xid in req.body, shouldAddCookies is true
                 if (!shouldAddCookies) {
                   req.p = req.p || {};
                   req.p.uid = uid;
@@ -1027,6 +1045,7 @@ function initializePolisHelpers() {
         }
       });
     }
+
     return function (
       req: any,
       res: { status: (arg0: number) => void },
@@ -1091,6 +1110,7 @@ function initializePolisHelpers() {
     return _auth(assigner, false);
   }
 
+  // setting the so-called auto gen id in req.body
   function enableAgid(req: { body: Body }, res: any, next: () => void) {
     req.body.agid = 1;
     next();
@@ -1299,6 +1319,7 @@ function initializePolisHelpers() {
     }
     res.status(200).json({});
   }
+
   let pcaCacheSize = Config.cacheMathResults ? 300 : 1;
   let pcaCache = new LruCache({
     max: pcaCacheSize,
@@ -1679,6 +1700,8 @@ function initializePolisHelpers() {
       });
     });
   }
+  
+  // redirect to about page is request has zid but no conversation_id
   function redirectIfHasZidButNoConversationId(
     req: { body: { zid: any; conversation_id: any }, headers?: any },
     res: {
@@ -1986,6 +2009,7 @@ function initializePolisHelpers() {
       ]
     );
   }
+
   if (
     Config.runPeriodicExportTests &&
     !devMode &&
@@ -2033,6 +2057,7 @@ function initializePolisHelpers() {
     };
     setInterval(runExportTest, 6 * 60 * 60 * 1000); // every 6 hours
   }
+
   function handle_GET_dataExport(
     req: { p: { uid?: any; zid: any; unixTimestamp: number; format: any } },
     res: { json: (arg0: {}) => void }
@@ -2058,6 +2083,7 @@ function initializePolisHelpers() {
         fail(res, 500, "polis_err_data_export123b", err);
       });
   }
+
   function handle_GET_dataExport_results(
     req: { p: { filename: string } },
     res: { redirect: (arg0: any) => void }
@@ -2074,6 +2100,7 @@ function initializePolisHelpers() {
     // });
     // return res.end();
   }
+
   function getBidIndexToPidMapping(zid: number, math_tick: number) {
     math_tick = math_tick || -1;
     return pgQueryP_readOnly(
@@ -2095,6 +2122,7 @@ function initializePolisHelpers() {
       }
     });
   }
+
   function handle_GET_bidToPid(
     req: { p: { zid: any; math_tick: any } },
     res: {
@@ -2119,6 +2147,7 @@ function initializePolisHelpers() {
     );
   }
 
+  // given a zid, get all the pids, xids involved in the conversation
   function getXids(zid: any) {
     // 'new' expression, whose target lacks a construct signature, implicitly has an 'any' type.ts(7009)
     // @ts-ignore
@@ -2141,6 +2170,9 @@ function initializePolisHelpers() {
       }
     );
   }
+
+  // handler function
+  // if the uid in the req object is the same as the zid's owner, retrieve and return the xids associated with the zid
   function handle_GET_xids(
     req: { p: { uid?: any; zid: any } },
     res: {
@@ -2164,7 +2196,7 @@ function initializePolisHelpers() {
             }
           );
         } else {
-          fail(res, 403, "polis_err_get_xids_not_authorized");
+          fail(res, 403, "polis_err_get_xids_not_authorized");  // uid of the req object is not the zid owner
         }
       },
       function (err: any) {
@@ -2172,6 +2204,7 @@ function initializePolisHelpers() {
       }
     );
   }
+  
   function handle_POST_xidWhitelist(
     req: { p: { xid_whitelist: any; uid?: any } },
     res: {
@@ -2504,6 +2537,8 @@ Feel free to reply to this email if you need help.`;
         JSON.stringify(res?._headers?.["set-cookie"])
     );
   }
+
+  // verifies that the uid in req.body is associated with the token found in the cookies and then assigns it in the req object
   function doCookieAuth(
     assigner: (arg0: any, arg1: string, arg2: number) => void,
     isOptional: any,
@@ -3559,6 +3594,7 @@ Feel free to reply to this email if you need help.`;
     );
   }
 
+  // given a zid and uid, checks if the uid is the same as the conversation owner's uid
   function isOwner(zid: any, uid: string) {
     return getConversationInfo(zid).then(function (info: any) {
       return info.owner === uid;

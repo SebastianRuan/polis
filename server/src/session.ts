@@ -82,6 +82,7 @@ const userTokenCache = new LruCache({
   max: 9000,
 });
 
+// runs the provided callback with the uid associated with the provided token in the auth_tokens table
 function getUserInfoForSessionToken(
   sessionToken: unknown,
   res: any,
