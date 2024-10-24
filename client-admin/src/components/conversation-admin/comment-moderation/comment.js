@@ -95,8 +95,4 @@ Comment.propTypes = {
   currentItem: PropTypes.bool
 }
 
-export default connect((state) => {
-  return {
-    conversation: state.zid_metadata.zid_metadata
-  }
-})(Comment)
+export default connect((state) => ({ conversation: state.zid_metadata.zid_metadata }))(Comment)
