@@ -73,8 +73,4 @@ ModerateCommentsAccepted.propTypes = {
   accepted_comments: PropTypes.arrayOf(PropTypes.object)
 }
 
-const mapStateToProps = (state) => ({
-  dispatch: state.mod_comments_accepted.dispatch,
-  accepted_comments: state.mod_comments_accepted.accepted_comments,
-});
-export default connect(mapStateToProps)(ModerateCommentsAccepted)
+export default connect((state) => state.mod_comments_accepted)(ModerateCommentsAccepted)

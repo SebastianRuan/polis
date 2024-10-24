@@ -73,8 +73,5 @@ ModerateCommentsRejected.propTypes = {
   dispatch: PropTypes.func,
   rejected_comments: PropTypes.arrayOf(PropTypes.object)
 }
-const mapStateToProps = (state) => ({
-  dispatch: state.mod_comments_rejected.dispatch,
-  rejected_comments: state.mod_comments_rejected.rejected_comments,
-});
-export default connect(mapStateToProps)(ModerateCommentsRejected)
+
+export default connect((state) => state.mod_comments_rejected)(ModerateCommentsRejected)
