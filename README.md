@@ -9,6 +9,7 @@ For a detailed methods paper, see [Polis: Scaling Deliberation by Mapping High D
 <!-- Changes to badge text in URLs below, require changes to "name" value in .github/workflows/*.yml -->
 [![Docker Image Builds](https://github.com/CivicTechTO/polis/workflows/Docker%20image%20builds/badge.svg)][docker-image-builds]
 [![E2E Tests](https://github.com/CivicTechTO/polis/workflows/E2E%20Tests/badge.svg)][e2e-tests]
+<img src="https://img.shields.io/liberapay/receives/ctto.polis.svg?logo=liberapay">
 
    [docker-image-builds]: https://hub.docker.com/u/newjerseystyle
    [e2e-tests]: https://github.com/CivicTechTO/polis/actions?query=workflow%3A%22E2E+Tests%22
