@@ -25,16 +25,17 @@ jobs:
           max-attempts: 10
           retry-delay: 10s
       
-      - name: Setup and install Node.js 18
+      - name: Setup and install Node.js 20
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 20
       - run: npm install
 
       # insert API interaction here
 
       - name: Create lighthouserc.js using Node.js
         run: |
+          node -e "
           const fs = require('fs');
           const config = {
             ci: {
@@ -48,6 +49,7 @@ jobs:
           };
 
           fs.writeFileSync('.lighthouserc.js', `module.exports = ${JSON.stringify(config, null, 2)};`);
+          "
 
       - name: Install and run Lighthouse CI
         run: |
