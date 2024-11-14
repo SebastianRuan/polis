@@ -10,10 +10,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 18
-      - run: npm install && npm install -g @lhci/cli@0.14.x
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -22,7 +18,41 @@ jobs:
         run: |
           docker compose -f docker-compose.yml -f docker-compose.test.yml --env-file test.env --profile postgres up -d --build
 
-      - run: lhci autorun
+      - name: Health Check the Server http response
+        uses: jtalk/url-health-check-action@v4
+        with:
+          url: http://localhost/api/v3/testConnection
+          max-attempts: 10
+          retry-delay: 10s
+      
+      - name: Setup and install Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - run: npm install
+
+      # insert API interaction here
+
+      - name: Create lighthouserc.js using Node.js
+        run: |
+          const fs = require('fs');
+          const config = {
+            ci: {
+              collect: {
+                url: ['http://localhost']
+              },
+              upload: {
+                target: 'temporary-public-storage'
+              }
+            }
+          };
+
+          fs.writeFileSync('.lighthouserc.js', `module.exports = ${JSON.stringify(config, null, 2)};`);
+
+      - name: Install and run Lighthouse CI
+        run: |
+          npm install -g @lhci/cli@0.14.x
+          lhci autorun
 
       - name: Stop Docker containers
         if: always()
