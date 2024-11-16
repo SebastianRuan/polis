@@ -1,0 +1,18 @@
+{
+  "ci": {
+    "collect": {
+      "url": [
+        "https://pol.is/4cvkai2ctw",
+        "https://pol.is/report/r7f89nk32sjuknecjbrxp",
+        "https://pol.is/signin"
+      ],
+      "numberOfRuns": 3
+    },
+    "assert": {
+      "preset": "lighthouse:recommended"
+    },
+    "upload": {
+      "target": "temporary-public-storage"
+    }
+  }
+}
