@@ -2,7 +2,7 @@
 
 import * as globals from "../components/globals";
 import createHull from "hull.js";
-import { scaleLinear } from 'd3'
+import { scaleLinear } from "d3-scale";
 
 const graphUtil = (comments, math, badTids) => {
 

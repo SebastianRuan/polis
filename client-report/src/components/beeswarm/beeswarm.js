@@ -4,9 +4,11 @@ import React from "react";
 import CommentList from "../lists/commentList";
 import * as globals from "../globals";
 import _ from "lodash";
-import { scaleLinear, extent, forceSimulation, forceX, forceY, forceCollide } from 'd3'
 
 import { voronoi as d3voronoi } from "d3-voronoi";
+import { scaleLinear } from "d3-scale";
+import { extent } from "d3-array";
+import { forceCollide, forceSimulation, forceX, forceY } from "d3-force";
 
 // import Flex from "../framework/flex"
 
