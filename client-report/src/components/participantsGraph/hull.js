@@ -2,7 +2,7 @@
 
 import React from "react";
 // import * as globals from "../globals";
-import { curveLinear, line } from "d3";
+import { curveLinear, line } from "d3-shape";
 
 const Hull = ({hull}) => {
   const curveLine = line().curve(curveLinear);

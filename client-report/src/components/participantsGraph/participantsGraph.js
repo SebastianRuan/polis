@@ -5,7 +5,8 @@ import _ from "lodash";
 import * as globals from "../globals";
 import graphUtil from "../../util/graphUtil";
 import Axes from "../graphAxes";
-import { scaleSequential, geoPath } from 'd3'
+import { scaleSequential } from "d3-scale";
+import { geoPath } from 'd3-geo';
 import { contourDensity } from "d3-contour";
 import { interpolateYlGnBu } from "d3-scale-chromatic";
 // import GroupLabels from "./groupLabels";
