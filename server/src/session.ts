@@ -82,7 +82,14 @@ const userTokenCache = new LruCache({
   max: 9000,
 });
 
-// runs the provided callback with the uid associated with the provided token in the auth_tokens table
+/**
+ * Retrieves the user ID (UID) associated with a given session token from the `auth_tokens` table.  Uses caching for performance.
+ * @param sessionToken - The session token to look up.
+ * @param res - The response object (currently unused, consider removing).
+ * @param cb - The callback function.  Signature: `(err: number | null, uid?: number | string) => void`.  `err` is a numeric error code (null if successful), and `uid` is the user ID.
+ * @throws {500} If there's a database error.
+ * @throws {403} If the token is invalid or expired.
+ */
 function getUserInfoForSessionToken(
   sessionToken: unknown,
   res: any,
