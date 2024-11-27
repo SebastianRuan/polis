@@ -144,7 +144,11 @@ function getFacebookInfo(uids: any[]) {
   );
 }
 
-// insert a new entry into the `users` table and return the value of uid for the new entry
+/**
+ * Inserts a new entry into the `users` table with a default timestamp for the `created` column and returns the newly generated UID.
+ * @returns A promise that resolves with the UID of the newly created user, or rejects with an error if the insertion fails.  The error message will be "polis_err_create_empty_user".
+ * @throws {Error} If the database insertion fails. The error message will be "polis_err_create_empty_user".
+ */
 function createDummyUser() {
   // (parameter) resolve: (arg0: any) => void
   //   'new' expression, whose target lacks a construct signature, implicitly has an 'any' type.ts(7009)
@@ -301,8 +305,17 @@ function getSocialInfoForUsers(uids: any[], zid: any) {
   );
 }
 
-// an owner with an xid is passed in, returns the matching entry(s?) from `xids` (that includes the corresponding uid)
-// if no xid entry is found, does some optional checks if caller chooses to determine if an entry into xids
+/**
+ * Retrieves a record from the `xids` table matching the provided XID and owner ID. Optionally creates a new record if one is not found.
+ * @param xid - The XID to search for. Should be a number or string depending on your database schema.
+ * @param owner - The owner ID to search for. Should be a number or string depending on your database schema.
+ * @param zid_optional - Optional ZID (conversation ID) for additional checks if a record needs to be created.
+ * @param x_profile_image_url - Optional profile image URL for the new record.
+ * @param x_name - Optional name for the new record.
+ * @param x_email - Optional email for the new record.
+ * @param createIfMissing - A boolean indicating whether to create a new record if one is not found.
+ * @returns A promise that resolves to an array of matching records from the `xids` table.  Returns `null` if no record is found and `createIfMissing` is false.  If `createIfMissing` is true and a new record is created, the promise resolves with an array containing the newly created record.
+ */
 function getXidRecordByXidOwnerId(
   xid: any,
   owner: any,
