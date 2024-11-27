@@ -144,6 +144,11 @@ function getFacebookInfo(uids: any[]) {
   );
 }
 
+/**
+ * Inserts a new entry into the `users` table with a default timestamp for the `created` column and returns the newly generated UID.
+ * @returns A promise that resolves with the UID of the newly created user, or rejects with an error if the insertion fails.  The error message will be "polis_err_create_empty_user".
+ * @throws {Error} If the database insertion fails. The error message will be "polis_err_create_empty_user".
+ */
 function createDummyUser() {
   // (parameter) resolve: (arg0: any) => void
   //   'new' expression, whose target lacks a construct signature, implicitly has an 'any' type.ts(7009)
@@ -300,6 +305,17 @@ function getSocialInfoForUsers(uids: any[], zid: any) {
   );
 }
 
+/**
+ * Retrieves a record from the `xids` table matching the provided XID and owner ID. Optionally creates a new record if one is not found.
+ * @param xid - The XID to search for. Should be a number or string depending on your database schema.
+ * @param owner - The owner ID to search for. Should be a number or string depending on your database schema.
+ * @param zid_optional - Optional ZID (conversation ID) for additional checks if a record needs to be created.
+ * @param x_profile_image_url - Optional profile image URL for the new record.
+ * @param x_name - Optional name for the new record.
+ * @param x_email - Optional email for the new record.
+ * @param createIfMissing - A boolean indicating whether to create a new record if one is not found.
+ * @returns A promise that resolves to an array of matching records from the `xids` table.  Returns `null` if no record is found and `createIfMissing` is false.  If `createIfMissing` is true and a new record is created, the promise resolves with an array containing the newly created record.
+ */
 function getXidRecordByXidOwnerId(
   xid: any,
   owner: any,
@@ -322,12 +338,14 @@ function getXidRecordByXidOwnerId(
       //     Type 'unknown' is not assignable to type 'any[]'.ts(2345)
       // @ts-ignore
       .then(function (rows: string | any[]) {
+        // if an `xids` table record with the provided xid and owner id cannot be found 
         if (!rows || !rows.length) {
           logger.warn("getXidRecordByXidOwnerId: no xInfo yet");
           if (!createIfMissing) {
             return null;
           }
 
+          // if provided zid, and if conversation is configured to use xid_whitelist, returns true if the owner id is whitelisted
           var shouldCreateXidEntryPromise = !zid_optional
             ? Promise.resolve(true)
             : Conversation.getConversationInfo(zid_optional).then(
@@ -338,6 +356,7 @@ function getXidRecordByXidOwnerId(
                 }
               );
 
+          // create a new user (in `users` table) and then a new entry in the `xids` table with the uid from the user creation process
           return shouldCreateXidEntryPromise.then((should: any) => {
             if (!should) {
               return null;

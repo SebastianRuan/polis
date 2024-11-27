@@ -1,6 +1,19 @@
 // Copyright (C) 2012-present, The Authors. This program is free software: you can redistribute it and/or  modify it under the terms of the GNU Affero General Public License, version 3, as published by the Free Software Foundation. This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more details. You should have received a copy of the GNU Affero General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 "use strict";
+/**
+ * @file This file contains core logic for a system utilizing various services and libraries to serve RESTful API.
+ *
+ * Dependencies:
+ *  - `akismet`: This library is used for spam protection. It provides functionality to check if user-submitted text is spam.
+ *  - `aws-sdk`: The AWS SDK provides functionality to interact with various AWS services (e.g., S3, EC2, Lambda).
+ *  - `badwords`: This library contains a list of profane words, used for filtering inappropriate language.
+ *  - `bluebird`: This library provides a robust implementation of Promises, offering enhanced features and performance compared to native Promises.
+ *  - `fb`: This library likely provides an interface for interacting with the Facebook Graph API, enabling access to Facebook data and functionalities.
+ *  - `googleapis`: This library is the official Google APIs Client Library for JavaScript. It allows interaction with various Google services (e.g., Google Drive, Gmail, YouTube).
+ *  - `bcryptjs`: This library implements the bcrypt password hashing algorithm, providing strong password security.
+ *  - `oauth`: This library provides a generic OAuth 1.0a and OAuth 2.0 client implementation, facilitating authentication with various OAuth-based services.
+ */
 
 import akismetLib from "akismet";
 import AWS from "aws-sdk";
@@ -234,6 +247,15 @@ function haltOnTimeout(req: { timedout: any }, res: any, next: () => void) {
   }
 }
 
+/**
+ * Checks if a property exists in a source object and copies it to a destination object.
+ *
+ * @param name - The name of the property to check and copy.
+ * @param source - The source object containing the property.
+ * @param dest - The destination object to copy the property to.
+ * @returns The destination object with the property copied if it exists in the source object. Returns undefined if the source object is undefined.
+ * @throws {Error} If the source object is not an object or the destination object is not an object or undefined.
+ **/
 function ifDefinedSet(
   name: string,
   source: { [x: string]: any },
@@ -297,6 +319,12 @@ function hasAuthToken(req: { cookies: { [x: string]: any } }) {
   return !!req.cookies[COOKIES.TOKEN];
 }
 
+/**
+ * Retrieves the user ID (UID) associated with a given API key.
+ *
+ * @param apikey - The API key to search for.
+ * @returns A Promise that resolves to the UID associated with the API key, or rejects if no matching API key is found or if a database error occurs.  The returned UID is of type number.
+ */
 function getUidForApiKey(apikey: any) {
   return pgQueryP_readOnly_wRetryIfEmpty(
     "select uid from apikeysndvweifu WHERE apikey = ($1);",
@@ -304,6 +332,20 @@ function getUidForApiKey(apikey: any) {
   );
 }
 // http://en.wikipedia.org/wiki/Basic_access_authentication#Client_side
+/**
+ * Performs API key authentication using Basic Authentication from the request header.
+ * This function extracts the API key (username) from the `Authorization` header,
+ * which is expected to be in the format "Basic <base64 encoded apikey>".
+ *
+ * @param assigner -  The assigner object (requires further clarification on its purpose).
+ * @param header - The `Authorization` header string from the request.
+ * @param isOptional - A boolean indicating whether API key authentication is optional.
+ * @param req - The request object.
+ * @param res - The response object.
+ * @param next - The next middleware function in the chain.
+ * @returns The result of the `doApiKeyAuth` function.
+ * @throws {Error} If the Authorization header is malformed or missing, or if there's an error during base64 decoding.
+ */
 function doApiKeyBasicAuth(
   assigner: any,
   header: string,
@@ -321,6 +363,17 @@ function doApiKeyBasicAuth(
   return doApiKeyAuth(assigner, apikey, isOptional, req, res, next);
 }
 
+/**
+ * Verifies an API key against the database and assigns the associated user ID (UID) to the request object.
+ *
+ * @param assigner - A function that assigns the UID to the request object.  It takes the request object, the property name ("uid"), and the UID value as arguments.
+ * @param apikey - The API key to verify.
+ * @param isOptional - A boolean indicating whether API key authentication is optional.
+ * @param req - The request object.
+ * @param res - The response object.  Must have a `status` method to set the HTTP status code.
+ * @param next - The next middleware function.  Handles errors or proceeds to the next middleware.
+ * @throws {Error} If the API key is invalid or if a database error occurs.  The error is passed to the `next` middleware function.
+ */
 function doApiKeyAuth(
   assigner: (arg0: any, arg1: string, arg2: number) => void,
   apikey: string,
@@ -374,6 +427,18 @@ const getXidRecordByXidOwnerId = User.getXidRecordByXidOwnerId;
 //   });
 // }
 
+/**
+ * Authenticates a request using an API key and an xid, retrieving and assigning relevant user IDs to the request object.
+ *
+ * @param assigner - A function to assign properties (uid, xid, owner_uid, org_id) to the request object.  It takes the request object, property name, and property value as arguments.
+ * @param apikey - The API key for authentication.
+ * @param xid - The xid to verify.
+ * @param isOptional - A boolean indicating whether authentication is optional. If true, a missing xid will not result in an error.
+ * @param req - The request object (assumed to have a `body` and `query` property).  Must be of type `AuthRequest`.
+ * @param res - The response object. Must have a `status` method to set the HTTP status code.
+ * @param next - The next middleware function. Handles errors or proceeds to the next middleware.
+ * @throws {Error} If the API key or xid is invalid, or if a database error occurs during authentication.  The error is passed to the `next` middleware function.
+ */
 function doXidApiKeyAuth(
   assigner: (arg0: any, arg1: string, arg2: number) => void,
   apikey: any,
@@ -387,7 +452,7 @@ function doXidApiKeyAuth(
     (arg0?: string | undefined): void;
   }
 ) {
-  getUidForApiKey(apikey)
+  getUidForApiKey(apikey)   // returns uid associated with the provided apikey from apikeysndvweifu table
     .then(
       //     Argument of type '(rows: string | any[]) => Promise<void> | undefined' is not assignable to parameter of type '(value: unknown) => void | PromiseLike<void | undefined> | undefined'.
       // Types of parameters 'rows' and 'value' are incompatible.
@@ -425,7 +490,7 @@ function doXidApiKeyAuth(
             }
           }
           let uidForCurrentUser = Number(rows[0].uid);
-          assigner(req, "uid", uidForCurrentUser);
+          assigner(req, "uid", uidForCurrentUser);    // the uid associated with the owner and xid in the xids table
           assigner(req, "xid", xid);
           assigner(req, "owner_uid", uidForApiKey);
           assigner(req, "org_id", uidForApiKey);
@@ -444,6 +509,18 @@ function doXidApiKeyAuth(
       next("polis_err_auth_misc_23423");
     });
 }
+
+/**
+ * Authenticates a request by verifying the `x-polis` token in the headers against the user ID (UID) in the request body.
+ * This function checks if the token is associated with the UID in the `auth_tokens` table.  If the authentication is successful, it assigns the UID to the request object.
+ *
+ * @param assigner - A function that assigns the UID to the request object. It takes the request object, property name ("uid"), and the UID value as arguments.
+ * @param isOptional - A boolean indicating whether authentication is optional.  If true, a missing or invalid token will not result in an error.
+ * @param req - The request object. Must contain `headers` (with a potential `x-polis` property) and `body` (with a potential `uid` property).
+ * @param res - The response object. Must have a `status` method to set the HTTP status code.
+ * @param next - The next middleware function. Handles errors or proceeds to the next middleware.
+ * @throws {Error} If the authentication fails (invalid token, UID mismatch, or database error). The error message is passed to the `next` middleware function.
+ */
 function doHeaderAuth(
   assigner: (arg0: any, arg1: string, arg2: number) => void,
   isOptional: any,
@@ -461,7 +538,7 @@ function doHeaderAuth(
       next("polis_err_auth_no_such_token");
       return;
     }
-    if (req.body.uid && req.body.uid !== uid) {
+    if (req.body.uid && req.body.uid !== uid) {   // compares the uid retrieved based on the token to the req.body's uid
       res.status(401);
       next("polis_err_auth_mismatch_uid");
       return;
@@ -538,6 +615,15 @@ function initializePolisHelpers() {
   const getPidPromise = User.getPidPromise;
   const getPidForParticipant = User.getPidForParticipant;
 
+/**
+ * Records the association between a permanent cookie token and a zid (presumably a user identifier) in the `permanentCookieZidJoins` table.
+ * If the association already exists, no action is taken.  If a database error occurs during the check, it attempts to insert the record anyway.
+ *
+ * @param permanentCookieToken - The permanent cookie token.  Should be a string.
+ * @param zid - The zid (user identifier). Should be a number or a string that can be safely cast to a number.
+ * @returns A Promise that resolves after the insertion attempt (or if the record already exists). The resolved value will depend on the `pgQueryP` function's return type.  It's likely to be void or a result object from the database query.
+ * @throws {Error} If a database error occurs during the insertion (though an error during the initial check is handled by attempting insertion).  The error is logged but not explicitly thrown.
+ */
   function recordPermanentCookieZidJoin(permanentCookieToken: any, zid: any) {
     function doInsert() {
       return pgQueryP(
@@ -831,17 +917,31 @@ function initializePolisHelpers() {
   //     });
   // }
 
+/**
+ * Authenticates a request based on an xid and conversation ID, verifying that the xid is whitelisted for the given conversation.
+ * The function checks if the xid is associated with the conversation and assigns the corresponding UID to the request object.  The `onDone` callback is always executed, regardless of success or failure.
+ *
+ * @param assigner - A function to assign the UID to the request object. It takes the request object, property name ("uid"), and the UID value as arguments.
+ * @param xid - The xid to verify.  Should be a string.
+ * @param conversation_id - The ID of the conversation. Should be a number or string.
+ * @param isOptional - A boolean indicating whether authentication is optional. If true, a missing or invalid xid will not result in an error.
+ * @param req - The request object (assumed to have `body` and `query` properties). Must be of type `AuthRequest`.
+ * @param res - The response object. Must have a `status` method to set the HTTP status code.
+ * @param onDone - A callback function that is executed regardless of the authentication outcome. It takes an optional error string as an argument.
+ * @throws {Error} If a database error occurs during authentication. The error is passed to the `onDone` callback.
+ */
   function doXidConversationIdAuth(
     assigner: (arg0: any, arg1: string, arg2: number) => void,
     xid: any,
     conversation_id: any,
-    isOptional: any,
+    isOptional: any,      // whether passing the auth check is optional
     req: AuthRequest,
     res: { status: (arg0: number) => void },
     onDone: { (err: any): void; (arg0?: string): void }
   ) {
     return getConversationInfoByConversationId(conversation_id)
       .then((conv: { org_id: any; zid: any }) => {
+        // 
         return getXidRecordByXidOwnerId(
           xid,
           conv.org_id,
@@ -856,6 +956,7 @@ function initializePolisHelpers() {
           //         Type 'unknown' is not assignable to type 'any[]'.ts(2345)
           // @ts-ignore
         ).then((rows: string | any[]) => {
+          // if conversation requires a whitelist check and the xid is not whitelisted
           if (!rows || !rows.length) {
             if (isOptional) {
               return onDone();
@@ -875,7 +976,23 @@ function initializePolisHelpers() {
         onDone(err);
       });
   }
+
+/**
+ * Creates authentication middleware that assigns the authenticated user's UID to the request object using the provided assigner function.
+ *
+ * @param assigner - A function to assign the UID to the request object.  Should be of type `(req: Request, prop: string, uid: number) => void`.
+ * @param isOptional - A boolean indicating whether authentication is optional. If true, the middleware will proceed even if authentication fails.
+ * @returns A middleware function that performs authentication and assigns the UID to the request object.
+ * @throws {Error} If authentication fails and `isOptional` is false.  The error message is included in the rejection.
+ */
   function _auth(assigner: any, isOptional: boolean) {
+    
+  /**
+   * Retrieves a key from the request body, headers, or query parameters.
+   * @param req - The request object.
+   * @param key - The name of the key to retrieve.
+   * @returns The value of the key, or undefined if not found.
+   */
     function getKey(
       req: {
         body: Body;
@@ -887,6 +1004,12 @@ function initializePolisHelpers() {
       return req.body[key] || req?.headers?.[key] || req?.query?.[key];
     }
 
+  /**
+   * Performs authentication and assigns the UID to the request object.
+   * @param req - The request object.
+   * @param res - The response object.
+   * @returns A Promise that resolves with the UID if authentication is successful, or rejects with an error message if authentication fails.
+   */
     function doAuth(
       req: {
         cookies: { [x: string]: any };
@@ -897,7 +1020,7 @@ function initializePolisHelpers() {
       res: { status: (arg0: number) => void }
     ) {
       //var token = req.body.token;
-      let token = req.cookies[COOKIES.TOKEN];
+      let token = req.cookies[COOKIES.TOKEN];   // currently req.cookies['token2']
       let xPolisToken = req?.headers?.["x-polis"];
 
       return new Promise(function (
@@ -915,8 +1038,8 @@ function initializePolisHelpers() {
         }
         if (xPolisToken) {
           logger.info("authtype: doHeaderAuth");
-          doHeaderAuth(assigner, isOptional, req, res, onDone);
-        } else if (getKey(req, "polisApiKey") && getKey(req, "ownerXid")) {
+          doHeaderAuth(assigner, isOptional, req, res, onDone);     // runs assigner with the uid associated with xPolisToken and calls onDone after
+        } else if (getKey(req, "polisApiKey") && getKey(req, "ownerXid")) {   // if poliApiKey and ownerXid can be found in the body, headers or query properties of req
           doXidApiKeyAuth(
             assigner,
             getKey(req, "polisApiKey"),
@@ -982,12 +1105,12 @@ function initializePolisHelpers() {
             res,
             onDone
           );
-        } else if (req.body.agid) {
+        } else if (req.body.agid) {     // create a new user, ...
           // Auto Gen user  ID
           createDummyUser()
             .then(
               function (uid?: any) {
-                let shouldAddCookies = _.isUndefined(req.body.xid);
+                let shouldAddCookies = _.isUndefined(req.body.xid);   // if there is no xid in req.body, shouldAddCookies is true
                 if (!shouldAddCookies) {
                   req.p = req.p || {};
                   req.p.uid = uid;
@@ -1025,6 +1148,7 @@ function initializePolisHelpers() {
         }
       });
     }
+
     return function (
       req: any,
       res: { status: (arg0: number) => void },
@@ -1089,6 +1213,12 @@ function initializePolisHelpers() {
     return _auth(assigner, false);
   }
 
+/**
+ * Sets the `agid` property to 1 in the request body.  This likely indicates that a new user should be automatically generated.
+ * @param req - The request object.  Must have a `body` property.
+ * @param res - The response object (not used in this function).
+ * @param next - The next middleware function in the chain.
+ */
   function enableAgid(req: { body: Body }, res: any, next: () => void) {
     req.body.agid = 1;
     next();
@@ -1679,7 +1809,13 @@ function initializePolisHelpers() {
       });
     });
   }
-
+  
+/**
+ * Redirects the request to the about page if a `zid` is present in the request body but `conversation_id` is missing.  This likely handles legacy users.
+ * @param req - The request object. Must contain `body.zid` and `body.conversation_id`.  Also needs `headers` for redirect.
+ * @param res - The response object.  Must have `writeHead` and `end` methods.
+ * @param next - The next middleware function.  Executed if no redirect is necessary.
+ */
   function redirectIfHasZidButNoConversationId(
     req: { body: { zid: any; conversation_id: any }; headers?: any },
     res: {
@@ -1984,6 +2120,7 @@ function initializePolisHelpers() {
       ]
     );
   }
+
   if (
     Config.runPeriodicExportTests &&
     !devMode &&
@@ -2031,6 +2168,7 @@ function initializePolisHelpers() {
     };
     setInterval(runExportTest, 6 * 60 * 60 * 1000); // every 6 hours
   }
+
   function handle_GET_dataExport(
     req: { p: { uid?: any; zid: any; unixTimestamp: number; format: any } },
     res: { json: (arg0: {}) => void }
@@ -2056,6 +2194,7 @@ function initializePolisHelpers() {
         fail(res, 500, "polis_err_data_export123b", err);
       });
   }
+
   function handle_GET_dataExport_results(
     req: { p: { filename: string } },
     res: { redirect: (arg0: any) => void }
@@ -2261,6 +2400,7 @@ function initializePolisHelpers() {
       }
     });
   }
+
   function handle_GET_bidToPid(
     req: { p: { zid: any; math_tick: any } },
     res: {
@@ -2285,6 +2425,12 @@ function initializePolisHelpers() {
     );
   }
 
+/**
+ * Retrieves all participant IDs (pids) and cross-IDs (xids) associated with a given ZID (conversation ID).
+ * @param zid - The ZID (conversation ID) to query.  Should be a number or string, depending on your database schema.
+ * @returns A promise that resolves with an array of objects, each containing a `pid` and `xid`, or rejects with an error message.  The structure of the returned objects depends on the database schema.
+ * @throws {"polis_err_fetching_xids"} If there's an error fetching the data from the database.
+ */
   function getXids(zid: any) {
     // 'new' expression, whose target lacks a construct signature, implicitly has an 'any' type.ts(7009)
     // @ts-ignore
@@ -2307,6 +2453,12 @@ function initializePolisHelpers() {
       }
     );
   }
+
+/**
+ * Handles GET requests for xids.  Checks if the requesting user (UID) is the owner of the ZID and returns associated XIDs if authorized.
+ * @param req - The request object.  Must contain `req.p.uid` (user ID) and `req.p.zid` (conversation ID).
+ * @param res - The response object.  Must have a `status` method with a `json` method.
+ */
   function handle_GET_xids(
     req: { p: { uid?: any; zid: any } },
     res: {
@@ -2330,7 +2482,7 @@ function initializePolisHelpers() {
             }
           );
         } else {
-          fail(res, 403, "polis_err_get_xids_not_authorized");
+          fail(res, 403, "polis_err_get_xids_not_authorized");  // uid of the req object is not the zid owner
         }
       },
       function (err: any) {
@@ -2338,6 +2490,7 @@ function initializePolisHelpers() {
       }
     );
   }
+  
   function handle_POST_xidWhitelist(
     req: { p: { xid_whitelist: any; uid?: any } },
     res: {
@@ -2676,6 +2829,17 @@ Feel free to reply to this email if you need help.`;
         JSON.stringify(res?._headers?.["set-cookie"])
     );
   }
+
+/**
+ * Authenticates a request using a cookie-based token. Verifies that the UID in the request body (if present) matches the UID associated with the token. Assigns the verified UID to the request object.
+ * @param assigner - A function to assign the authenticated UID to the request object.  Signature: `(req: any, key: string, value: number) => void`.
+ * @param isOptional - A boolean indicating whether authentication is optional. If true, a missing or invalid token will not result in an error.
+ * @param req - The request object.  Must contain `req.cookies[COOKIES.TOKEN]` (authentication token) and `req.body.uid` (user ID, optional).
+ * @param res - The response object.  Must have a `status` method.
+ * @param next - The next middleware function.
+ * @throws {"polis_err_auth_no_such_token"} if the token is invalid and authentication is not optional.
+ * @throws {"polis_err_auth_mismatch_uid"} if the UID in the request body does not match the UID from the token.
+ */
   function doCookieAuth(
     assigner: (arg0: any, arg1: string, arg2: number) => void,
     isOptional: any,
@@ -3725,6 +3889,12 @@ Feel free to reply to this email if you need help.`;
     );
   }
 
+/**
+ * Checks if a given user ID (UID) is the owner of a conversation identified by its ZID (conversation ID).
+ * @param zid - The ZID (conversation ID) to check.  Should be a number or string, depending on your database schema.
+ * @param uid - The UID (user ID) to check for ownership.
+ * @returns A promise that resolves to a boolean indicating whether the UID is the owner of the conversation.
+ */
   function isOwner(zid: any, uid: string) {
     return getConversationInfo(zid).then(function (info: any) {
       return info.owner === uid;
