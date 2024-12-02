@@ -179,6 +179,8 @@ module.exports = ConversationView.extend({
   */
 
     var html = markdown.toHTML(md_content);
+    // delete the <p> ... </p> wrapper
+    html = html.replace(/^<p>|<\/p>$/g, '');
     ctx.description = html;
     if (/^ *$/.test(ctx.description) || _.isNull(ctx.description) || ctx.description === "") {
       ctx.description = void 0;
