@@ -22,7 +22,7 @@ import ReactDOM from 'react-dom';
 
 
 
-class Root extends React.Component {
+export class Root extends React.Component {
   render() {
 
     let comments = this.props.comments;
