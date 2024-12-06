@@ -55,5 +55,7 @@ jobs:
             IMAGE_NAME=$(echo "$image" | sed 's/ghcr.io/docker.io/g')
             IMAGE_NAME=$(echo "$IMAGE_NAME" | sed 's/civictechto/${{ secrets.DOCKER_USERNAME }}/g')
             docker tag $image $IMAGE_NAME
+            sed -i 's/ghcr.io/docker.io/g' docker-compose.yml
+            sed -i 's/civictechto/${{ secrets.DOCKER_USERNAME }}/g' docker-compose.yml
           done
           docker compose --profile postgres push --ignore-push-failures
