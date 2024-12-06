@@ -33,7 +33,7 @@ jobs:
 
       - name: Create lighthouserc.js using Node.js and install required packages
         run: |
-          npm install -g fs axios tough-cookie axios-cookiejar-support
+          npm install fs axios tough-cookie axios-cookiejar-support
           node generate-lighthouserc.js
 
       - name: Install and run Lighthouse CI
