@@ -31,10 +31,10 @@ jobs:
           node-version: 20
       - run: npm install
 
-      # insert API interaction here
-
-      - name: Create lighthouserc.js using Node.js
-        run: node generate-lighthouserc.js
+      - name: Create lighthouserc.js using Node.js and install required packages
+        run: |
+          npm install -g fs axios tough-cookie axios-cookiejar-support
+          node generate-lighthouserc.js
 
       - name: Install and run Lighthouse CI
         run: |
