@@ -31,15 +31,14 @@ jobs:
           node-version: 20
       - run: npm install
 
-      - name: Create lighthouserc.js using Node.js and install required packages
+      - name: Decode and save Google credentials to a file
         run: |
-          npm install fs axios tough-cookie axios-cookiejar-support
-          node generate-lighthouserc.js
+          echo "${{ secrets.GOOGLE_CREDENTIALS }}" | base64 --decode > ./googleCredentials.json
 
-      - name: Install and run Lighthouse CI
+      - name: Install required packages and run lighthouse audit (results to be uploaded to access issue log)
         run: |
-          npm install -g @lhci/cli@0.14.x
-          lhci autorun
+          npm install axios tough-cookie axios-cookiejar-support lighthouse chrome-launcher googleapis
+          node lighthouseAudit.mjs --spreadSheetId="176knLyqkJ0vxFMH-qtWi9J17-oJ3-ChdLQkISd59oOY"
 
       - name: Stop Docker containers
         if: always()
