@@ -38,7 +38,7 @@ jobs:
       - name: Install required packages and run lighthouse audit (results to be uploaded to access issue log)
         run: |
           npm install axios tough-cookie axios-cookiejar-support lighthouse chrome-launcher googleapis
-          node lighthouseAudit.mjs --spreadSheetId="176knLyqkJ0vxFMH-qtWi9J17-oJ3-ChdLQkISd59oOY"
+          node lighthouseAudit.mjs --spreadsheetId="176knLyqkJ0vxFMH-qtWi9J17-oJ3-ChdLQkISd59oOY"
 
       - name: Stop Docker containers
         if: always()
