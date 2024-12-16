@@ -4,7 +4,8 @@ import React from "react";
 
 import _ from "lodash";
 import * as globals from "../globals";
-import { interpolatePuOr, scaleLinear } from "d3";
+import { interpolatePuOr } from "d3-scale-chromatic";
+import { scaleLinear } from "d3-scale";
 
 var leftOffset = 34;
 var topOffset = 60;
