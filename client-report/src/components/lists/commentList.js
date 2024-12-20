@@ -4,7 +4,7 @@ import React from "react";
 import _ from "lodash";
 import * as globals from "../globals";
 
-const BarChartCompact = ({ comment, voteCounts, nMembers, voteColors }) => {
+export const BarChartCompact = ({ comment, voteCounts, nMembers, voteColors }) => {
   if (!comment) return null;
 
   let w = 100;
@@ -77,7 +77,7 @@ const BarChartCompact = ({ comment, voteCounts, nMembers, voteColors }) => {
   );
 };
 
-const CommentRow = ({ comment, groups, voteColors }) => {
+export const CommentRow = ({ comment, groups, voteColors }) => {
   if (!comment) {
     console.error("WHY IS THERE NO COMMENT 3452354235", comment);
     return null;

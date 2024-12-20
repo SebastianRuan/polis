@@ -2,7 +2,7 @@ import _ from "lodash";
 import React from "react";
 import * as globals from "./globals";
 
-class Button extends React.Component {
+export class Button extends React.Component {
 
   handleClick() {
     this.props.handleCurateButtonClick(this.props.identifier)
@@ -29,7 +29,7 @@ class Button extends React.Component {
   }
 }
 
-class Curate extends React.Component {
+export class Curate extends React.Component {
 
   constructor(props) {
     super(props);
