@@ -12,7 +12,6 @@ import PropTypes from "prop-types";
 // @connect(state => {
 //   return state.FOO;
 // })
-@Radium
 class ComponentName extends React.Component {
   constructor(props) {
     super(props);
@@ -52,6 +51,7 @@ class ComponentName extends React.Component {
   }
 }
 
+ComponentName = Radium(ComponentName);
 export default ComponentName;
 
 /*
