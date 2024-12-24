@@ -22,7 +22,7 @@ const styles = {
 }
 
 @connect((state) => state.seed_comments_tweet)
-class ModerateCommentsSeed extends React.Component {
+class ModerateCommentsSeedClass extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
@@ -122,7 +122,7 @@ class ModerateCommentsSeed extends React.Component {
   }
 }
 
-ModerateCommentsSeed.propTypes = {
+ModerateCommentsSeedClass.propTypes = {
   dispatch: PropTypes.func,
   error: PropTypes.string,
   success: PropTypes.any,
@@ -133,7 +133,7 @@ ModerateCommentsSeed.propTypes = {
   })
 }
 
-ModerateCommentsSeed = Radium(ModerateCommentsSeed)
+const ModerateCommentsSeed = Radium(ModerateCommentsSeedClass)
 export default ModerateCommentsSeed
 
 /*
