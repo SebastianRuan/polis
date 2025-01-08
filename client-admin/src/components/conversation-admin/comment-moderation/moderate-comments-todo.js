@@ -90,9 +90,4 @@ ModerateCommentsTodo.propTypes = {
   unmoderated_comments: PropTypes.arrayOf(PropTypes.object)
 }
 
-const mapStateToProps = (state) => ({
-  dispatch: state.mod_comments_unmoderated.dispatch,
-  unmoderated_comments: state.mod_comments_unmoderated.unmoderated_comments,
-});
-
-export default connect(mapStateToProps)(ModerateCommentsTodo)
+export default connect((state) => state.mod_comments_unmoderated)(ModerateCommentsTodo)

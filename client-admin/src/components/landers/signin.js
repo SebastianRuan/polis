@@ -12,8 +12,7 @@ import strings from '../../strings/strings'
 
 const fbAppId = process.env.FB_APP_ID
 
-@connect((state) => state.signin)
-class SignIn extends React.Component {
+class SignInClass extends React.Component {
   // eslint-disable-next-line node/handle-callback-err
   static getDerivedStateFromError(error) {
     // Update state so the next render will show the fallback UI.
@@ -186,5 +185,5 @@ class SignIn extends React.Component {
     )
   }
 }
-
+const SignIn = connect((state) => state.signin)(SignInClass)
 export default SignIn

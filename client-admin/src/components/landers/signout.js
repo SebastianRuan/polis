@@ -8,8 +8,7 @@ import { Heading } from 'theme-ui'
 
 import { doSignout } from '../../actions'
 
-@connect((state) => state.signout)
-class SignOut extends React.Component {
+class SignOutClass extends React.Component {
   componentDidMount() {
     this.props.dispatch(doSignout('/home'))
   }
@@ -25,8 +24,9 @@ class SignOut extends React.Component {
   }
 }
 
-SignOut.propTypes = {
+SignOutClass.propTypes = {
   dispatch: PropTypes.func
 }
 
+const SignOut = connect((state) => state.signout)(SignOutClass)
 export default SignOut
