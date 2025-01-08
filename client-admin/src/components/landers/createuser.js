@@ -12,7 +12,6 @@ import strings from '../../strings/strings'
 
 const fbAppId = process.env.FB_APP_ID
 
-// @connect((state) => state.signin)
 class CreateuserClass extends React.Component {
   getDest() {
     return this.props.location.pathname.slice('/createuser'.length)
