@@ -26,12 +26,12 @@
 
       {{#if hideHelp}}
         {{!-- even if help text is hidden, still screen read the main comment box label/prompt --}}
-        <label for="comment_form_textarea"
-               style="display:none;">
+        <label id="writeCommentHelpText"
+               class="screen-reader-text">
           {{{s.writeCommentHelpText}}}
         </label>
       {{else}}
-        <label for="comment_form_textarea"
+        <label id="writeCommentHelpText"
                style="display:block;">
           {{{s.writeCommentHelpText}}}
         </label>
@@ -43,9 +43,9 @@
           <li>{{{s.helpWriteListRaisNew}}}</li>
           <li>{{{s.helpWriteListShort}}}</li>
         </ul>
-        <label for="comment_form_textarea" style="display:block">
+        <p id="tipCommentsRandom" style="display:block">
           {{{s.tipCommentsRandom}}}
-        </label>
+        </p>
       {{/if}}
 
       {{!-- end screen-reader-text --}}
@@ -54,9 +54,11 @@
   {{!-- present all hints to screen reader --}}
   <div class="screen-reader-text">
     <h2>{{s.commentWritingTipsHintsHeader}}</h2>
-    <label for="comment_form_textarea" style="display:block">{{charLimitString}}</label>
-    <label for="comment_form_textarea" style="display:block">{{s.tipNoQuestions}}</label>
-    <label for="comment_form_textarea" style="display:block">{{s.tipOneIdea}}</label>
+    <ul>
+      <li id="charLimitString" style="display:block">{{charLimitString}}</li>
+      <li id="tipNoQuestions" style="display:block">{{s.tipNoQuestions}}</li>
+      <li id="tipOneIdea" style="display:block">{{s.tipOneIdea}}</li>
+    </ul>
   </div> {{!-- end screen-reader-text --}}
 
 
@@ -131,6 +133,8 @@
           name="txt"
           type="text"
           maxlength="400"
+          aria-labelledby="writeCommentHelpText"
+          aria-describedby="{{#unless hideHelp}}tipCommentsRandom {{/unless}}charLimitString tipNoQuestions tipOneIdea commentCharCountExceededContainer"
           {{!-- placeholder="Submit your own opinions here. Shorter is better - break up your ideas. You are not responding to anyone else directly - comments are sent out randomly to all participants."  --}}
           placeholder="{{s.writePrompt}}"
           {{#if shouldAutofocusOnTextarea}}autofocus{{/if}}
@@ -211,13 +215,14 @@
         style="display: none; color: gray; {{#if desktop}}min-width: 20px;{{/if}}"
         class="comment_form_control_hideable unselectable">
       </span>
-      <label
-        id="commentCharCountExceeded"
-        for="comment_form_textarea"
-        role="alert"
-        style="display: none; color: red; {{#if desktop}}min-width: 20px;{{/if}}"
-        class="comment_form_control_hideable unselectable">
-      </label>
+      <span id="commentCharCountExceededContainer">
+        <span
+          id="commentCharCountExceeded"
+          role="alert"
+          style="display: none; color: red; {{#if desktop}}min-width: 20px;{{/if}}"
+          class="comment_form_control_hideable unselectable">
+        </span>
+      </span>
       <button
         class="
           Btn
