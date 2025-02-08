@@ -6,7 +6,7 @@ import { connect } from 'react-redux'
 import { doCreateUser, doFacebookSignin } from '../../actions'
 import { Heading, Box, Text, Button, jsx } from 'theme-ui'
 
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import StaticLayout from './lander-layout'
 import strings from '../../strings/strings'
 
@@ -225,4 +225,9 @@ class CreateuserClass extends React.Component {
 }
 const Createuser = connect((state) => state.signin)(CreateuserClass)
 
-export default Createuser
+const CreateUserWithLocation = (props) => {
+  const location = useLocation()
+  return <Createuser {...props} location={location} />
+}
+
+export default CreateUserWithLocation

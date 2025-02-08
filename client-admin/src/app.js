@@ -8,7 +8,7 @@ import { populateUserStore } from './actions'
 
 import _ from 'lodash'
 
-import { Switch, Route, Link, Redirect } from 'react-router-dom'
+import { Routes, Route, Link, Navigate, useLocation } from 'react-router-dom'
 import { Flex, Box, jsx } from 'theme-ui'
 
 /* landers */
@@ -31,28 +31,20 @@ import Integrate from './components/conversations-and-account/integrate'
 
 import InteriorHeader from './components/interior-header'
 
-const PrivateRoute = ({ component: Component, isLoading, authed, ...rest }) => {
+const PrivateRoute = ({ element: Component, isLoading, authed, ...rest }) => {
+  const location = useLocation();
   if (isLoading) {
-    return null
+    return null;
   }
-  return (
-    <Route
-      {...rest}
-      render={(props) =>
-        authed === true ? (
-          <Component {...props} />
-        ) : (
-          <Redirect
-            to={{ pathname: '/signin', state: { from: props.location } }}
-          />
-        )
-      }
-    />
-  )
+  return authed === true ? (
+    <Component {...rest} />
+  ) : (
+    <Navigate to="/signin" state={{ from: location }} replace />
+  );
 }
 
 PrivateRoute.propTypes = {
-  component: PropTypes.element,
+  element: PropTypes.element,
   isLoading: PropTypes.bool,
   location: PropTypes.object,
   authed: PropTypes.bool
@@ -127,119 +119,100 @@ class App extends React.Component {
   }
 
   render() {
+    const SignInWrapper = (props) => {
+      return <SignIn {...props} authed={this.isAuthed()} />;
+    };
     const { location } = this.props
     return (
       <>
-        <Switch>
-          <Redirect from="/:url*(/+)" to={location.pathname.slice(0, -1)} />
-          <Route exact path="/home" component={Home} />
+        <Routes>
           <Route
-            exact
-            path="/signin"
+            path=":url/*(/+)"
+            element={<Navigate to={location.pathname.slice(0, -1)} replace />} />
+          <Route path="/home" element={<Home />} />
+          <Route
+            path="/signin" element={<SignInWrapper />}
             render={() => <SignIn {...this.props} authed={this.isAuthed()} />}
           />
-          <Route
-            exact
-            path="/signin/*"
-            render={() => <SignIn {...this.props} authed={this.isAuthed()} />}
-          />
-          <Route
-            exact
-            path="/signin/**/*"
-            render={() => <SignIn {...this.props} authed={this.isAuthed()} />}
-          />
-          <Route exact path="/signout" component={SignOut} />
-          <Route exact path="/signout/*" component={SignOut} />
-          <Route exact path="/signout/**/*" component={SignOut} />
-          <Route exact path="/createuser" component={CreateUser} />
-          <Route exact path="/createuser/*" component={CreateUser} />
-          <Route exact path="/createuser/**/*" component={CreateUser} />
+          <Route path="/signout" element={<SignOut />} />
+          <Route path="/createuser" element={<CreateUser />} />
 
-          <Route exact path="/pwreset" component={PasswordReset} />
-          <Route path="/pwreset/*" component={PasswordReset} />
-          <Route exact path="/pwresetinit" component={PasswordResetInit} />
-          <Route
-            exact
-            path="/pwresetinit/done"
-            component={PasswordResetInitDone}
-          />
-          <Route exact path="/tos" component={TOS} />
-          <Route exact path="/privacy" component={Privacy} />
-
-          <InteriorHeader>
-            <Route
-              render={(routeProps) => {
-                if (routeProps.location.pathname.split('/')[1] === 'm') {
-                  return null
-                }
-                return (
-                  <Flex>
-                    <Box sx={{ mr: [5], p: [4], flex: '0 0 auto' }}>
-                      <Box sx={{ mb: [3] }}>
-                        <Link sx={{ variant: 'links.nav' }} to={`/`}>
-                          Conversations
-                        </Link>
-                      </Box>
-                      <Box sx={{ mb: [3] }}>
-                        <Link sx={{ variant: 'links.nav' }} to={`/integrate`}>
-                          Integrate
-                        </Link>
-                      </Box>
-                      <Box sx={{ mb: [3] }}>
-                        <Link sx={{ variant: 'links.nav' }} to={`/account`}>
-                          Account
-                        </Link>
-                      </Box>
-                    </Box>
-                    <Box
-                      sx={{
-                        p: [4],
-                        flex: '0 0 auto',
-                        maxWidth: '35em',
-                        mx: [4]
-                      }}>
-                      <PrivateRoute
-                        isLoading={this.isLoading()}
-                        authed={this.isAuthed()}
-                        exact
-                        path="/"
-                        component={Conversations}
-                      />
-                      <PrivateRoute
-                        isLoading={this.isLoading()}
-                        authed={this.isAuthed()}
-                        exact
-                        path="/conversations"
-                        component={Conversations}
-                      />
-                      <PrivateRoute
-                        isLoading={this.isLoading()}
-                        authed={this.isAuthed()}
-                        exact
-                        path="/account"
-                        component={Account}
-                      />
-                      <PrivateRoute
-                        isLoading={this.isLoading()}
-                        authed={this.isAuthed()}
-                        exact
-                        path="/integrate"
-                        component={Integrate}
-                      />
-                    </Box>
-                  </Flex>
-                )
-              }}
-            />
-
-            <PrivateRoute
-              isLoading={this.isLoading()}
-              path="/m/:conversation_id"
-              authed={this.isAuthed()}
-              component={ConversationAdminContainer}
-            />
-          </InteriorHeader>
-        </Switch>
+          <Route path="/pwreset" element={<PasswordReset />} />
+          <Route path="/pwresetinit" element={<PasswordResetInit />} >
+            <Route path="done" element={<PasswordResetInitDone />} />
+          </Route>
+          <Route path="/tos" element={<TOS />} />
+          <Route path="/privacy" element={<Privacy />} />
+        </Routes>
+        <InteriorHeader>
+          <Flex>
+            <Box sx={{ mr: [5], p: [4], flex: '0 0 auto' }}>
+              <Box sx={{ mb: [3] }}>
+                <Link sx={{ variant: 'links.nav' }} to={`/`}>
+                  Conversations
+                </Link>
+              </Box>
+              <Box sx={{ mb: [3] }}>
+                <Link sx={{ variant: 'links.nav' }} to={`/integrate`}>
+                  Integrate
+                </Link>
+              </Box>
+              <Box sx={{ mb: [3] }}>
+                <Link sx={{ variant: 'links.nav' }} to={`/account`}>
+                  Account
+                </Link>
+              </Box>
+            </Box>
+            <Box
+              sx={{
+                p: [4],
+                flex: '0 0 auto',
+                maxWidth: '35em',
+                mx: [4]
+              }}>
+              <Routes>
+                <Route path="/"
+                  element={
+                    <PrivateRoute
+                      isLoading={this.isLoading()}
+                      authed={this.isAuthed()}
+                      element={Conversations}
+                    />} />
+                <Route path="conversations"
+                  element={
+                    <PrivateRoute
+                      isLoading={this.isLoading()}
+                      authed={this.isAuthed()}
+                      element={Conversations}
+                    />} />
+                <Route path="account"
+                  element={
+                    <PrivateRoute
+                      isLoading={this.isLoading()}
+                      authed={this.isAuthed()}
+                      element={Account}
+                    />
+                  } />
+                <Route path="integrate"
+                  element={
+                    <PrivateRoute
+                      isLoading={this.isLoading()}
+                      authed={this.isAuthed()}
+                      element={Integrate}
+                    />} />
+              </Routes>
+            </Box>
+          </Flex>
+          <Routes>
+            <Route path="m/:conversation_id"
+              element={
+                <PrivateRoute
+                  isLoading={this.isLoading()}
+                  authed={this.isAuthed()}
+                  element={ConversationAdminContainer}
+                />} />
+          </Routes>
+        </InteriorHeader>
       </>
     )
   }
@@ -259,4 +232,9 @@ App.propTypes = {
   })
 }
 
-export default App
+function AppWithLocation(props) {
+  const location = useLocation()
+  return <App {...props} location={location} />
+}
+
+export default AppWithLocation

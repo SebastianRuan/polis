@@ -4,7 +4,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { doSignin, doFacebookSignin } from '../../actions'
-import { Link, Redirect } from 'react-router-dom'
+import { Link, Navigate } from 'react-router-dom'
 import { Heading, Box, Text, Button, jsx } from 'theme-ui'
 import StaticLayout from './lander-layout'
 
@@ -170,7 +170,7 @@ class SignInClass extends React.Component {
     const { signInSuccessful, authed } = this.props
 
     if (signInSuccessful || authed) {
-      return <Redirect to={'/'} />
+      return <Navigate to={'/'} />
     }
 
     return (

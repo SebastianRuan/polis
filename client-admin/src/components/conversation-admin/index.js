@@ -5,7 +5,7 @@ import React from 'react'
 import { connect } from 'react-redux'
 import { Flex, Box, jsx } from 'theme-ui'
 import { populateZidMetadataStore, resetMetadataStore } from '../../actions'
-import { Switch, Route, Link } from 'react-router-dom'
+import { Route, Link, Routes } from 'react-router-dom'
 
 import ConversationConfig from './conversation-config'
 import ConversationStats from './stats'
@@ -99,29 +99,29 @@ class ConversationAdminContainer extends React.Component {
           </Box>
         </Box>
         <Box sx={{ p: [4], flex: '0 0 auto', maxWidth: '35em', mx: [4] }}>
-          <Switch>
+          <Routes>
             <Route
               exact
               path={`${match.path}/`}
-              component={ConversationConfig}
+              element={<ConversationConfig />}
             />
             <Route
               exact
               path={`${match.path}/share`}
-              component={ShareAndEmbed}
+              element={<ShareAndEmbed />}
             />
-            <Route exact path={`${match.path}/reports`} component={Reports} />
+            <Route exact path={`${match.path}/reports`} element={<Reports />} />
             <Route
               path={`${match.path}/comments`}
-              component={ModerateComments}
+              element={<ModerateComments />}
             />
             <Route
               exact
               path={`${match.path}/stats`}
-              component={ConversationStats}
+              element={<ConversationStats />}
             />
-            {/* <Route exact path={`${match.path}/export`} component={DataExport} /> */}
-          </Switch>
+            {/* <Route exact path={`${match.path}/export`} element={<DataExport />} /> */}
+          </Routes>
         </Box>
       </Flex>
     )
