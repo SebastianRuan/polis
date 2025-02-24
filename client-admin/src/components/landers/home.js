@@ -7,11 +7,11 @@ import Press from './press'
 const Index = () => {
   return (
     <Layout>
-      <Heading as="h1" sx={{ my: [4, null, 5], fontSize: [6, null, 7] }}>
+      <Heading as="h2" sx={{ my: [4, null, 5], fontSize: [6, null, 7] }}>
         Input Crowd, Output Meaning
       </Heading>
-      <Heading
-        as="h3"
+      <Text
+        as="strong"
         sx={{
           fontSize: [3, null, 4],
           lineHeight: 'body',
@@ -20,7 +20,7 @@ const Index = () => {
         Polis is a real-time system for gathering, analyzing and understanding
         what large groups of people think in their own words, enabled by
         advanced statistics and machine learning.
-      </Heading>
+      </Text>
       <Box sx={{ mb: [4, null, 5] }}>
         <Text>
           Polis has been used all over the world by governments, academics,
@@ -28,7 +28,7 @@ const Index = () => {
         </Text>
       </Box>
       <Heading
-        as="h3"
+        as="h2"
         sx={{ fontSize: [4], lineHeight: 'body', mb: [2, null, 3] }}>
         Get Started
       </Heading>
@@ -40,7 +40,7 @@ const Index = () => {
       <Press />
       <ExploreKnowledgeBase />
       <Heading
-        as="h3"
+        as="h2"
         sx={{ fontSize: [4], lineHeight: 'body', my: [2, null, 3] }}>
         Contribute
       </Heading>

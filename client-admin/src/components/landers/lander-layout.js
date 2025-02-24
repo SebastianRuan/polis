@@ -14,7 +14,7 @@ const Layout = ({ children }) => {
         padding: `0 1.0875rem 1.45rem`
       }}>
       <Header globalWidth={globalWidth} />
-      <Box>{children}</Box>
+      <Box as="main">{children}</Box>
       <Footer />
     </Box>
   )
