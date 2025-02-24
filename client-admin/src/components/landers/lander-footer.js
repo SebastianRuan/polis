@@ -4,12 +4,14 @@ import { Box, Link, Heading, jsx } from 'theme-ui'
 
 import emoji from 'react-easy-emoji'
 
-class Header extends Component {
+class Footer extends Component {
   render() {
     return (
-      <Box sx={{ mt: [3, null, 4] }}>
+      <Box 
+        as="footer" 
+        sx={{ mt: [3, null, 4] }}>
         <Heading
-          as="h3"
+          as="h2"
           sx={{ fontSize: [4], lineHeight: 'body', my: [2, null, 3] }}>
           Legal
         </Heading>
@@ -26,4 +28,4 @@ class Header extends Component {
   }
 }
 
-export default Header
+export default Footer

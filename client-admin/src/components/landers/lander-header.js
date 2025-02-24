@@ -8,7 +8,7 @@ import Logomark from '../framework/logomark'
 class Header extends Component {
   render() {
     return (
-      <Box>
+      <Box as="header">
         <Flex
           sx={{
             margin: `0 auto`,
@@ -17,7 +17,7 @@ class Header extends Component {
             paddingBottom: '1.45rem',
             justifyContent: 'space-between'
           }}>
-          <Box sx={{ zIndex: 1000 }}>
+          <Box as="h1" sx={{ zIndex: 1000 }}>
             <Link sx={{ variant: 'links.nav' }} to="/home">
               <Logomark
                 style={{ marginRight: 10, position: 'relative', top: 6 }}
